@@ -54,6 +54,7 @@ pub struct Config {
     pub marks: Option<HashMap<String, String>>,
     pub clone_repo_switch: Option<CloneRepoSwitchConfig>,
     pub vcs_providers: Option<Vec<VcsProviders>>,
+    pub preview_pane_percentage: Option<u16>,
 }
 
 pub const DEFAULT_VCS_PROVIDERS: &[VcsProviders] = &[VcsProviders::Git];

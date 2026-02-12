@@ -141,6 +141,9 @@ pub struct ConfigArgs {
     /// When set to `Foreground`, the new session will only be opened in the background if the active
     /// tmux session has changed since starting the clone process (for long clone processes on larger repos)
     clone_repo_switch: Option<CloneRepoSwitchConfig>,
+    #[arg(long, value_name = "10-90")]
+    /// Percentage of the picker allocated to the preview pane (default 50)
+    preview_pane_percentage: Option<u16>,
 }
 
 #[derive(Debug, Args)]
@@ -483,6 +486,10 @@ fn config_command(cmd: &ConfigCommand, mut config: Config) -> Result<()> {
 
     if let Some(switch) = &args.clone_repo_switch {
         config.clone_repo_switch = Some(switch.to_owned());
+    }
+
+    if let Some(pct) = args.preview_pane_percentage {
+        config.preview_pane_percentage = Some(pct.clamp(10, 90));
     }
 
     config.save().change_context(TmsError::ConfigError)?;
