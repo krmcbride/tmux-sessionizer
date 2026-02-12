@@ -53,6 +53,7 @@ pub struct Picker<'a> {
     input_position: InputPosition,
     tmux: &'a Tmux,
     active_sessions: Option<std::collections::HashSet<String>>,
+    preview_pane_percentage: u16,
 }
 
 impl<'a> Picker<'a> {
@@ -88,6 +89,7 @@ impl<'a> Picker<'a> {
             input_position,
             tmux,
             active_sessions: None,
+            preview_pane_percentage: 50,
         }
     }
 
@@ -99,6 +101,14 @@ impl<'a> Picker<'a> {
 
     pub fn set_active_sessions(mut self, active: std::collections::HashSet<String>) -> Self {
         self.active_sessions = Some(active);
+
+        self
+    }
+
+    pub fn set_preview_pane_percentage(mut self, percentage: Option<u16>) -> Self {
+        if let Some(pct) = percentage {
+            self.preview_pane_percentage = pct.clamp(10, 90);
+        }
 
         self
     }
@@ -189,7 +199,10 @@ impl<'a> Picker<'a> {
             };
             Layout::new(
                 preview_direction,
-                [Constraint::Percentage(50), Constraint::Percentage(50)],
+                [
+                    Constraint::Percentage(100 - self.preview_pane_percentage),
+                    Constraint::Percentage(self.preview_pane_percentage),
+                ],
             )
             .split(area)
         } else {

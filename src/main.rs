@@ -56,7 +56,8 @@ fn main() -> Result<()> {
         config.input_position.unwrap_or_default(),
         &tmux,
     )
-    .set_colors(config.picker_colors.as_ref());
+    .set_colors(config.picker_colors.as_ref())
+    .set_preview_pane_percentage(config.preview_pane_percentage);
 
     if let Some(active) = active_sessions {
         picker = picker.set_active_sessions(active);
