@@ -13,8 +13,8 @@ use ratatui::{
     style::{Style, Stylize},
     text::{Line, Span},
     widgets::{
-        block::Position, Block, Borders, HighlightSpacing, List, ListDirection, ListItem,
-        ListState, Paragraph,
+        block::Position, Block, BorderType, Borders, HighlightSpacing, List, ListDirection,
+        ListItem, ListState, Paragraph,
     },
     DefaultTerminal, Frame,
 };
@@ -212,35 +212,41 @@ impl<'a> Picker<'a> {
             Rc::new([area])
         };
 
-        let top_constraint;
-        let bottom_constraint;
+        let colors = if let Some(colors) = self.colors {
+            colors.to_owned()
+        } else {
+            PickerColorConfig::default_colors()
+        };
+
+        let picker_border = Block::default()
+            .borders(Borders::ALL)
+            .border_type(BorderType::Rounded)
+            .border_style(Style::default().fg(colors.border_color()));
+        let picker_inner = picker_border.inner(preview_split[picker_pane]);
+        f.render_widget(picker_border, preview_split[picker_pane]);
+
         let list_direction;
-        let input_index;
-        let list_index;
-        let borders;
         let title_position;
         match input_position {
             InputPosition::Top => {
-                top_constraint = Constraint::Length(1);
-                bottom_constraint = Constraint::Length(preview_split[picker_pane].height - 1);
                 list_direction = ListDirection::TopToBottom;
-                input_index = 0;
-                list_index = 1;
-                borders = Borders::TOP;
                 title_position = Position::Top;
             }
             InputPosition::Bottom => {
-                top_constraint = Constraint::Length(preview_split[picker_pane].height - 1);
-                bottom_constraint = Constraint::Length(1);
                 list_direction = ListDirection::BottomToTop;
-                input_index = 1;
-                list_index = 0;
-                borders = Borders::BOTTOM;
                 title_position = Position::Bottom;
             }
         }
-        let layout = Layout::new(Direction::Vertical, [top_constraint, bottom_constraint])
-            .split(preview_split[picker_pane]);
+        let layout = Layout::new(
+            Direction::Vertical,
+            [Constraint::Min(0), Constraint::Length(1)],
+        )
+        .split(picker_inner);
+        let (list_index, input_index) = if input_position == InputPosition::Top {
+            (1, 0)
+        } else {
+            (0, 1)
+        };
 
         let snapshot = self.matcher.snapshot();
         let matches = snapshot
@@ -258,12 +264,6 @@ impl<'a> Picker<'a> {
                 ListItem::new(text)
             });
 
-        let colors = if let Some(colors) = self.colors {
-            colors.to_owned()
-        } else {
-            PickerColorConfig::default_colors()
-        };
-
         let table = List::new(matches)
             .highlight_style(colors.highlight_style())
             .direction(list_direction)
@@ -271,7 +271,8 @@ impl<'a> Picker<'a> {
             .highlight_symbol("> ")
             .block(
                 Block::default()
-                    .borders(borders)
+                    .borders(Borders::BOTTOM)
+                    .border_type(BorderType::Rounded)
                     .border_style(Style::default().fg(colors.border_color()))
                     .title_style(Style::default().fg(colors.info_color()))
                     .title_position(title_position)

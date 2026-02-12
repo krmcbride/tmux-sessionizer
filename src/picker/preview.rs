@@ -4,7 +4,7 @@ use ratatui::{
     layout::{Direction, Rect},
     style::{Color, Style, Stylize},
     text::{Line, Span, Text},
-    widgets::{Block, Borders, Paragraph, Widget, Wrap},
+    widgets::{Block, BorderType, Borders, Paragraph, Widget, Wrap},
 };
 
 pub struct PreviewWidget {
@@ -39,6 +39,7 @@ impl Widget for PreviewWidget {
             .block(
                 Block::default()
                     .borders(border_position)
+                    .border_type(BorderType::Thick)
                     .border_style(Style::default().fg(self.border_color)),
             )
             .wrap(Wrap { trim: false })
