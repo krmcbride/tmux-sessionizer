@@ -39,7 +39,8 @@ pub fn get_single_selection(
         config.input_position.unwrap_or_default(),
         tmux,
     )
-    .set_colors(config.picker_colors.as_ref());
+    .set_colors(config.picker_colors.as_ref())
+    .set_preview_pane_percentage(config.preview_pane_percentage);
 
     picker.run()
 }
