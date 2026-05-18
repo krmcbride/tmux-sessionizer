@@ -255,6 +255,10 @@ impl Tmux {
         repo_name: &str,
         config: &Config,
     ) -> Result<()> {
+        if !config.auto_open_worktree_windows() {
+            return Ok(());
+        }
+
         let worktrees = repo.worktrees(config).change_context(TmsError::GitError)?;
         let worktrees = worktrees
             .iter()

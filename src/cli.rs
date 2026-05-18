@@ -110,6 +110,9 @@ pub struct ConfigArgs {
     /// Search submodules for submodules
     recursive_submodules: Option<bool>,
     #[arg(long, value_name = "true | false")]
+    /// Automatically open worktrees as tmux windows when creating a repository session
+    auto_open_worktree_windows: Option<bool>,
+    #[arg(long, value_name = "true | false")]
     ///Only include sessions from search paths in the switcher
     switch_filter_unknown: Option<bool>,
     #[arg(long, short = 'd', value_name = "max depth", num_args = 1..)]
@@ -425,6 +428,10 @@ fn config_command(cmd: &ConfigCommand, mut config: Config) -> Result<()> {
 
     if let Some(submodules) = args.recursive_submodules {
         config.recursive_submodules = Some(submodules.to_owned());
+    }
+
+    if let Some(auto_open_worktree_windows) = args.auto_open_worktree_windows {
+        config.auto_open_worktree_windows = Some(auto_open_worktree_windows.to_owned());
     }
 
     if let Some(switch_filter_unknown) = args.switch_filter_unknown {

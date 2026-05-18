@@ -124,6 +124,8 @@ Options:
           Also show initialized submodules [possible values: true, false]
       --recursive-submodules <true | false>
           Search submodules for submodules [possible values: true, false]
+      --auto-open-worktree-windows <true | false>
+          Automatically open worktrees as tmux windows when creating a repository session [possible values: true, false]
       --switch-filter-unknown <true | false>
           Only include sessions from search paths in the switcher [possible values: true, false]
   -d, --max-depths <max depth>...

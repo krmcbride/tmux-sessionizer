@@ -40,6 +40,7 @@ pub struct Config {
     pub display_full_path: Option<bool>,
     pub search_submodules: Option<bool>,
     pub recursive_submodules: Option<bool>,
+    pub auto_open_worktree_windows: Option<bool>,
     pub switch_filter_unknown: Option<bool>,
     pub session_sort_order: Option<SessionSortOrderConfig>,
     pub excluded_dirs: Option<Vec<String>>,
@@ -73,6 +74,7 @@ pub struct ConfigExport {
     pub display_full_path: bool,
     pub search_submodules: bool,
     pub recursive_submodules: bool,
+    pub auto_open_worktree_windows: bool,
     pub switch_filter_unknown: bool,
     pub session_sort_order: SessionSortOrderConfig,
     pub excluded_dirs: Vec<String>,
@@ -94,6 +96,7 @@ impl From<Config> for ConfigExport {
             display_full_path: value.display_full_path.unwrap_or_default(),
             search_submodules: value.search_submodules.unwrap_or_default(),
             recursive_submodules: value.recursive_submodules.unwrap_or_default(),
+            auto_open_worktree_windows: value.auto_open_worktree_windows.unwrap_or(true),
             switch_filter_unknown: value.switch_filter_unknown.unwrap_or_default(),
             session_sort_order: value.session_sort_order.unwrap_or_default(),
             excluded_dirs: value.excluded_dirs.unwrap_or_default(),
@@ -260,6 +263,10 @@ impl Config {
                 self.bookmarks = Some(vec![path]);
             }
         }
+    }
+
+    pub fn auto_open_worktree_windows(&self) -> bool {
+        self.auto_open_worktree_windows.unwrap_or(true)
     }
 
     pub fn delete_bookmark(&mut self, path: String) {
