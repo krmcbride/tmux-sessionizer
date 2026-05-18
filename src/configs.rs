@@ -48,6 +48,7 @@ pub struct Config {
     pub search_dirs: Option<Vec<SearchDirectory>>,
     pub sessions: Option<Vec<Session>>,
     pub picker_colors: Option<PickerColorConfig>,
+    pub on_session_create: Option<PathBuf>,
     pub input_position: Option<InputPosition>,
     pub shortcuts: Option<Keymap>,
     pub bookmarks: Option<Vec<String>>,
@@ -81,6 +82,7 @@ pub struct ConfigExport {
     pub search_dirs: Vec<SearchDirectory>,
     pub sessions: Vec<Session>,
     pub picker_colors: PickerColorConfig,
+    pub on_session_create: Option<PathBuf>,
     pub shortcuts: Keymap,
     pub bookmarks: Vec<String>,
     pub session_configs: HashMap<String, SessionConfig>,
@@ -105,6 +107,7 @@ impl From<Config> for ConfigExport {
             picker_colors: PickerColorConfig::with_defaults(
                 value.picker_colors.unwrap_or_default(),
             ),
+            on_session_create: value.on_session_create,
             shortcuts: value
                 .shortcuts
                 .as_ref()

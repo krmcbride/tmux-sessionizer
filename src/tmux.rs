@@ -1,10 +1,16 @@
-use std::{env, os::unix::process::CommandExt, path::Path, process};
+use std::{
+    collections::HashMap,
+    env,
+    os::unix::process::CommandExt,
+    path::{Path, PathBuf},
+    process,
+};
 
 use error_stack::ResultExt;
 
 use crate::repos::RepoProvider;
 use crate::{
-    configs::Config,
+    configs::{Config, SessionConfig},
     dirty_paths::DirtyUtf8Path,
     error::{Result, TmsError},
 };
@@ -140,16 +146,7 @@ impl Tmux {
         session_name: &str,
         config: &Config,
     ) -> Result<()> {
-        let command_path = match &config.session_configs {
-            Some(sessions) => match sessions.get(session_name) {
-                Some(session) => match &session.create_script {
-                    Some(create_script) => create_script.to_owned(),
-                    None => path.join(".tms-create"),
-                },
-                None => path.join(".tms-create"),
-            },
-            None => path.join(".tms-create"),
-        };
+        let command_path = session_create_script_path(path, session_name, config)?;
 
         self.run_session_script(&command_path, session_name)
     }
@@ -307,6 +304,71 @@ impl Tmux {
     }
 }
 
+fn session_create_script_path(
+    session_path: &Path,
+    session_name: &str,
+    config: &Config,
+) -> Result<PathBuf> {
+    let configured_path = config
+        .session_configs
+        .as_ref()
+        .and_then(|sessions: &HashMap<String, SessionConfig>| sessions.get(session_name))
+        .and_then(|session| session.create_script.as_ref())
+        .or(config.on_session_create.as_ref());
+
+    if let Some(path) = configured_path {
+        let path = path.to_string_lossy();
+        let expanded_path = shellexpand::full(path.as_ref()).change_context(TmsError::IoError)?;
+        Ok(expanded_path.as_ref().into())
+    } else {
+        Ok(session_path.join(".tms-create"))
+    }
+}
+
 fn is_in_tmux_session() -> bool {
     std::env::var("TERM_PROGRAM").is_ok_and(|program| program == "tmux")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn expands_configured_session_create_script_paths() -> Result<()> {
+        let home = env::var("HOME").change_context(TmsError::IoError)?;
+        let config = Config {
+            on_session_create: Some("~/bin/tms-session-create".into()),
+            ..Default::default()
+        };
+
+        let command_path = session_create_script_path(Path::new("/repo"), "repo", &config)?;
+
+        assert_eq!(
+            command_path,
+            Path::new(&home).join("bin/tms-session-create")
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn session_create_script_overrides_global_script() -> Result<()> {
+        let mut session_configs = HashMap::new();
+        session_configs.insert(
+            "repo".into(),
+            SessionConfig {
+                create_script: Some("$HOME/bin/repo-create".into()),
+            },
+        );
+        let home = env::var("HOME").change_context(TmsError::IoError)?;
+        let config = Config {
+            on_session_create: Some("~/bin/global-create".into()),
+            session_configs: Some(session_configs),
+            ..Default::default()
+        };
+
+        let command_path = session_create_script_path(Path::new("/repo"), "repo", &config)?;
+
+        assert_eq!(command_path, Path::new(&home).join("bin/repo-create"));
+        Ok(())
+    }
 }

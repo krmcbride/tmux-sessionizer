@@ -140,6 +140,8 @@ Options:
           Color of the item count in the picker
       --picker-prompt-color <#rrggbb>
           Color of the prompt in the picker
+      --on-session-create <script path>
+          Global script to run after creating a new session
       --session-sort-order <Alphabetical | LastAttach>
           Set the sort order of the sessions in the switch command [possible values: Alphabetical, LastAttached]
   -h, --help
@@ -159,6 +161,13 @@ Windows: C:\Users\Alice\AppData\Roaming\tms\config.toml
 If the config directory can't be found, it will also check `~/.config/tms/config.toml` (only
 relevant on Windows and macOS). Alternatively, you can specify a custom config location by setting
 the `TMS_CONFIG_FILE` environment variable in your shell profile with your desired config path.
+
+#### Session create scripts
+
+The `on_session_create` config option can point to a script that runs after a new session is
+created. Session-specific `[session_configs.<name>].create_script` values take precedence over the
+global script. Configured script paths support shell-like expansion such as `~` and `$HOME`. If
+neither is configured, tms falls back to a `.tms-create` script in the session path when one exists.
 
 #### Customizing keyboard shortcuts
 

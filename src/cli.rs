@@ -134,6 +134,9 @@ pub struct ConfigArgs {
     #[arg(long, value_name = "#rrggbb")]
     /// Color of the prompt in the picker
     picker_prompt_color: Option<Color>,
+    #[arg(long, value_name = "script path")]
+    /// Global script to run after creating a new session
+    on_session_create: Option<PathBuf>,
     #[arg(long, value_name = "Alphabetical | LastAttached")]
     /// Set the sort order of the sessions in the switch command
     session_sort_order: Option<SessionSortOrderConfig>,
@@ -485,6 +488,10 @@ fn config_command(cmd: &ConfigCommand, mut config: Config) -> Result<()> {
         let mut picker_colors = config.picker_colors.unwrap_or_default();
         picker_colors.prompt_color = Some(*color);
         config.picker_colors = Some(picker_colors);
+    }
+
+    if let Some(on_session_create) = &args.on_session_create {
+        config.on_session_create = Some(on_session_create.to_owned());
     }
 
     if let Some(order) = &args.session_sort_order {

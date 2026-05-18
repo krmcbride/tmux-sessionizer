@@ -1,7 +1,7 @@
 use assert_cmd::Command;
 use pretty_assertions::assert_eq;
 use ratatui::style::Color;
-use std::{fs, str::FromStr};
+use std::{fs, path::PathBuf, str::FromStr};
 use tempfile::tempdir;
 use tms::configs::{
     CloneRepoSwitchConfig, Config, PickerColorConfig, SearchDirectory, SessionSortOrderConfig,
@@ -35,6 +35,7 @@ fn tms_config() -> anyhow::Result<()> {
     let depth = 1;
     let default_session = String::from("my_default_session");
     let excluded_dir = String::from("/exclude/this/directory");
+    let on_session_create = PathBuf::from("/usr/local/bin/tms-session-create");
     let picker_highlight_color = Color::from_str("#aaaaaa")?;
     let picker_highlight_text_color = Color::from_str("#bbbbbb")?;
     let picker_border_color = Color::from_str("#cccccc")?;
@@ -63,6 +64,7 @@ fn tms_config() -> anyhow::Result<()> {
             info_color: Some(picker_info_color),
             prompt_color: Some(picker_prompt_color),
         }),
+        on_session_create: Some(on_session_create.clone()),
         shortcuts: None,
         bookmarks: None,
         session_configs: None,
@@ -108,6 +110,8 @@ fn tms_config() -> anyhow::Result<()> {
             &picker_info_color.to_string(),
             "--picker-prompt-color",
             &picker_prompt_color.to_string(),
+            "--on-session-create",
+            on_session_create.to_str().unwrap(),
             "--clone-repo-switch",
             "Always",
         ]);
